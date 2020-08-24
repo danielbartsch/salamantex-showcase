@@ -159,9 +159,18 @@ function App() {
 }
 
 const UserList = ({ users }: { users: Array<User> }) => (
-  <>{users.map((user) => "user here")}</>
+  <>
+    {users.map((user) => (
+      <User user={user} />
+    ))}
+  </>
 )
+
+const User = ({ user }: { user: User }) => (
+  <div>
+    {user.name} ({user.email})
       </div>
+)
     </>
   )
 }
