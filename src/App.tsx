@@ -146,11 +146,21 @@ function App() {
     <>
       <h3>Users</h3>
       <div>
-        {users === null
-          ? "Loading..."
-          : users.length > 0
-          ? "User list here"
-          : "No users saved"}
+        {users === null ? (
+          "Loading..."
+        ) : users.length > 0 ? (
+          <UserList users={users} />
+        ) : (
+          "No users saved"
+        )}
+      </div>
+    </>
+  )
+}
+
+const UserList = ({ users }: { users: Array<User> }) => (
+  <>{users.map((user) => "user here")}</>
+)
       </div>
     </>
   )
