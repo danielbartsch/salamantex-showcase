@@ -179,7 +179,7 @@ const User = ({ user }: { user: User }) => {
         Show transactions
       </button>
       {showDetails && (
-  <div>
+        <div>
           <div>{user.description}</div>
           <div>
             {user.currencies.map((currency) => (
@@ -198,8 +198,8 @@ const User = ({ user }: { user: User }) => {
         </div>
       )}
       {showTransactions && <TransactionList user={user} />}
-      </div>
-)
+    </div>
+  )
 }
 
 const CurrencyType = ({ type }: CryptoCurrency) => {
