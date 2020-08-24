@@ -171,7 +171,7 @@ const User = ({ user }: { user: User }) => {
   const [showTransactions, setShowTransactions] = React.useState(false)
   return (
     <div>
-      {user.name} {user.email}
+      <UserRepresentation id={user.id} />
       <button onClick={() => setShowDetails((prev) => !prev)}>
         Show details
       </button>
@@ -202,7 +202,7 @@ const User = ({ user }: { user: User }) => {
   )
 }
 
-const CurrencyType = ({ type }: CryptoCurrency) => {
+const CurrencyType = ({ type }: { type: CryptoCurrency["type"] }) => {
   switch (type) {
     case "ethereum":
       return <>Ethereum</>
@@ -233,17 +233,36 @@ const TransactionList = ({ user }: { user: User }) => {
 
   return (
     <>
-      {transactions.length > 0
-        ? transactions.map((transaction) => (
+      {transactions.length > 0 ? (
+        <ul>
+          {transactions.map((transaction) => (
             <Transaction transaction={transaction} />
-          ))
-        : "No transactions found..."}
+          ))}
+        </ul>
+      ) : (
+        "No transactions found..."
+      )}
     </>
   )
 }
 
 const Transaction = ({ transaction }: { transaction: Transaction }) => {
-  return <div>Transaction</div>
+  return (
+    <li>
+      <UserRepresentation id={transaction.sourceUserId} /> sent{" "}
+      {transaction.amount} <CurrencyType type={transaction.type} /> to{" "}
+      <UserRepresentation id={transaction.targetUserId} />
+    </li>
+  )
+}
+
+const UserRepresentation = ({ id }: { id: UserId }) => {
+  const user = database.users[id]
+
+  if (!user) {
+    return <>user not found</>
+  }
+  return <span title={user.email}>{user.name}</span>
 }
 
 export default App
