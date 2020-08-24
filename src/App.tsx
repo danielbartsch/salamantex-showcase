@@ -1,4 +1,5 @@
 import React from "react"
+import { map } from "lodash"
 
 type CryptoCurrencyType = "bitcoin" | "ethereum"
 
@@ -135,7 +136,25 @@ const database: { users: Users; transactions: Transactions } = {
 }
 
 function App() {
-  return <>Begin</>
+  const [users, setUsers] = React.useState<Array<User> | null>(null)
+
+  React.useEffect(() => {
+    setUsers(map(database.users))
+  }, [])
+
+  return (
+    <>
+      <h3>Users</h3>
+      <div>
+        {users === null
+          ? "Loading..."
+          : users.length > 0
+          ? "User list here"
+          : "No users saved"}
+      </div>
+    </>
+  )
+}
 }
 
 export default App
