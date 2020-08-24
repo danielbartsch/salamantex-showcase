@@ -166,11 +166,47 @@ const UserList = ({ users }: { users: Array<User> }) => (
   </>
 )
 
-const User = ({ user }: { user: User }) => (
+const User = ({ user }: { user: User }) => {
+  const [showDetails, setShowDetails] = React.useState(false)
+  return (
+    <div>
+      {user.name} {user.email}
+      <button onClick={() => setShowDetails((prev) => !prev)}>
+        Show details
+      </button>
+      {showDetails && (
   <div>
-    {user.name} ({user.email})
+          <div>{user.description}</div>
+          <div>
+            {user.currencies.map((currency) => (
+              <div>
+                <div>
+                  <CurrencyType {...currency} />
+                </div>
+                <div>Balance: {currency.balance}</div>
+                <div>
+                  Maximum amount in a single transaction:{" "}
+                  {currency.maxTransactionAmount}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       </div>
 )
+}
+
+const CurrencyType = ({ type }: CryptoCurrency) => {
+  switch (type) {
+    case "ethereum":
+      return <>Ethereum</>
+    case "bitcoin":
+      return <>Bitcoin</>
+    default:
+      return <>currency not found</>
+  }
+}
     </>
   )
 }
