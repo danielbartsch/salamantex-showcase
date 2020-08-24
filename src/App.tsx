@@ -168,11 +168,15 @@ const UserList = ({ users }: { users: Array<User> }) => (
 
 const User = ({ user }: { user: User }) => {
   const [showDetails, setShowDetails] = React.useState(false)
+  const [showTransactions, setShowTransactions] = React.useState(false)
   return (
     <div>
       {user.name} {user.email}
       <button onClick={() => setShowDetails((prev) => !prev)}>
         Show details
+      </button>
+      <button onClick={() => setShowTransactions((prev) => !prev)}>
+        Show transactions
       </button>
       {showDetails && (
   <div>
@@ -193,6 +197,7 @@ const User = ({ user }: { user: User }) => {
           </div>
         </div>
       )}
+      {showTransactions && <TransactionList user={user} />}
       </div>
 )
 }
@@ -207,9 +212,38 @@ const CurrencyType = ({ type }: CryptoCurrency) => {
       return <>currency not found</>
   }
 }
+
+const TransactionList = ({ user }: { user: User }) => {
+  const [transactions, setTransactions] = React.useState<Array<
+    Transaction
+  > | null>(null)
+
+  React.useEffect(() => {
+    const transactionsInvolvingUser = map(
+      database.transactions
+    ).filter(({ sourceUserId, targetUserId }) =>
+      [sourceUserId, targetUserId].includes(user.id)
+    )
+    setTransactions(transactionsInvolvingUser)
+  }, [user])
+
+  if (transactions === null) {
+    return <>Loading...</>
+  }
+
+  return (
+    <>
+      {transactions.length > 0
+        ? transactions.map((transaction) => (
+            <Transaction transaction={transaction} />
+          ))
+        : "No transactions found..."}
     </>
   )
 }
+
+const Transaction = ({ transaction }: { transaction: Transaction }) => {
+  return <div>Transaction</div>
 }
 
 export default App
