@@ -210,7 +210,7 @@ function App() {
 const UserList = ({ users }: { users: Array<UserType> }) => (
   <>
     {users.map((user) => (
-      <User user={user} />
+      <User key={user.id} user={user} />
     ))}
   </>
 )
