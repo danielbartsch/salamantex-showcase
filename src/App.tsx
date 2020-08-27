@@ -1,5 +1,5 @@
 import React from "react"
-import { map, uniqueId, initial } from "lodash"
+import { map, uniqueId, initial, sortBy, flatMap } from "lodash"
 import Select from "react-select"
 import {
   User as UserType,
@@ -127,6 +127,57 @@ function App() {
     setUsers(map(currentDatabase.users))
   }, [currentDatabase.users])
 
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      const allTransactions = map(currentDatabase.transactions)
+      const [processingTransaction] = sortBy(
+        flatMap(allTransactions, (transaction) =>
+          transaction.processed === null ? [transaction] : []
+        ),
+        ({ created }) => created
+      )
+
+      if (processingTransaction) {
+        const now = Date.now()
+
+        const currencyInfo = currentDatabase.users[
+          processingTransaction.sourceUserId
+        ].currencies.find(({ type }) => type === processingTransaction.type)
+
+        const initialBalance = currencyInfo?.balance ?? 0
+        const currentBalance = getBalance(
+          allTransactions,
+          processingTransaction.sourceUserId,
+          initialBalance,
+          processingTransaction.type,
+          now
+        )
+
+        setDatabase((prev) => ({
+          ...prev,
+          transactions: {
+            ...prev.transactions,
+            [processingTransaction.id]: {
+              ...prev.transactions[processingTransaction.id],
+              processed: now,
+              state:
+                currentBalance <
+                  prev.transactions[processingTransaction.id].amount &&
+                currencyInfo?.maxTransactionAmount !== undefined &&
+                prev.transactions[processingTransaction.id].amount <=
+                  currencyInfo?.maxTransactionAmount
+                  ? "invalid"
+                  : "processed",
+            },
+          },
+        }))
+      }
+    }, 1000 * 3)
+    return () => {
+      clearInterval(interval)
+    }
+  })
+
   return (
     <DatabaseContext.Provider value={currentDatabase}>
       <h3>Users</h3>
@@ -208,20 +259,14 @@ const User = ({ user }: { user: UserType }) => {
   )
 }
 
-const Balance = ({
-  userId,
-  currencyBalance,
-  currencyType,
-  now,
-}: {
-  userId: UserType["id"]
-  currencyBalance: CryptoCurrency["balance"]
-  currencyType: CryptoCurrency["type"]
+const getBalance = (
+  transactions: Array<TransactionType>,
+  userId: UserType["id"],
+  currencyBalance: number,
+  currencyType: CryptoCurrency["type"],
   now: number
-}) => {
-  const transactions = useTransactionsInvolvingUser(userId)
-
-  const balance = transactions?.reduce(
+) =>
+  transactions?.reduce(
     (sum, { type, amount, sourceUserId, processed, state }) => {
       if (
         type === currencyType &&
@@ -237,7 +282,32 @@ const Balance = ({
     currencyBalance ?? 0
   )
 
-  return <>{balance}</>
+const useBalance = (
+  userId: UserType["id"],
+  currencyBalance: number,
+  currencyType: CryptoCurrency["type"],
+  now: number
+) =>
+  getBalance(
+    useTransactionsInvolvingUser(userId) ?? [],
+    userId,
+    currencyBalance,
+    currencyType,
+    now
+  )
+
+const Balance = ({
+  userId,
+  currencyBalance,
+  currencyType,
+  now,
+}: {
+  userId: UserType["id"]
+  currencyBalance: CryptoCurrency["balance"]
+  currencyType: CryptoCurrency["type"]
+  now: number
+}) => {
+  return <>{useBalance(userId, currencyBalance, currencyType, now)}</>
 }
 
 const CurrencyType = ({ type }: { type: CryptoCurrency["type"] }) => {
