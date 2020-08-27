@@ -1,5 +1,7 @@
+import { currencies } from "./constants"
+
 export type CryptoCurrency = {
-  type: "bitcoin" | "ethereum"
+  type: typeof currencies[number]
   walletId: string
   balance: number
   maxTransactionAmount: number

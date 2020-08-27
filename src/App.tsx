@@ -1,10 +1,12 @@
 import React from "react"
-import { map } from "lodash"
+import { map, uniqueId } from "lodash"
+import Select from "react-select"
 import {
   User as UserType,
   Transaction as TransactionType,
   CryptoCurrency,
 } from "./types"
+import { currencies } from "./constants"
 
 type Users = {
   [key in UserType["id"]]: UserType
@@ -13,7 +15,9 @@ type Transactions = {
   [key in TransactionType["id"]]: TransactionType
 }
 
-const database: { users: Users; transactions: Transactions } = {
+type Database = { users: Users; transactions: Transactions }
+
+const initialDatabase: Database = {
   users: {
     a: {
       id: "a",
@@ -111,11 +115,15 @@ const database: { users: Users; transactions: Transactions } = {
 }
 
 function App() {
+  const [currentDatabase, setDatabase] = React.useState<Database>(
+    initialDatabase
+  )
+
   const [users, setUsers] = React.useState<Array<UserType> | null>(null)
 
   React.useEffect(() => {
-    setUsers(map(database.users))
-  }, [])
+    setUsers(map(currentDatabase.users))
+  }, [currentDatabase.users])
 
   return (
     <>
@@ -124,29 +132,49 @@ function App() {
         {users === null ? (
           "Loading..."
         ) : users.length > 0 ? (
-          <UserList users={users} />
+          <UserList users={users} database={currentDatabase} />
         ) : (
           "No users saved"
         )}
+      </div>
+      <div>
+        <NewTransactionForm
+          database={currentDatabase}
+          onApply={(transaction) =>
+            setDatabase((prev) => ({
+              ...prev,
+              transactions: {
+                ...prev.transactions,
+                [transaction.id]: transaction,
+              },
+            }))
+          }
+        />
       </div>
     </>
   )
 }
 
-const UserList = ({ users }: { users: Array<UserType> }) => (
+const UserList = ({
+  users,
+  database,
+}: {
+  users: Array<UserType>
+  database: Database
+}) => (
   <>
     {users.map((user) => (
-      <User user={user} />
+      <User user={user} database={database} />
     ))}
   </>
 )
 
-const User = ({ user }: { user: UserType }) => {
+const User = ({ user, database }: { user: UserType; database: Database }) => {
   const [showDetails, setShowDetails] = React.useState(false)
   const [showTransactions, setShowTransactions] = React.useState(false)
   return (
     <div>
-      <UserRepresentation id={user.id} />
+      <UserRepresentation id={user.id} database={database} />
       <button onClick={() => setShowDetails((prev) => !prev)}>
         Show details
       </button>
@@ -169,6 +197,7 @@ const User = ({ user }: { user: UserType }) => {
                     currencyBalance={currency.balance}
                     currencyType={currency.type}
                     now={Date.now()}
+                    database={database}
                   />
                 </div>
                 <div>
@@ -180,7 +209,7 @@ const User = ({ user }: { user: UserType }) => {
           </div>
         </div>
       )}
-      {showTransactions && <TransactionList user={user} />}
+      {showTransactions && <TransactionList user={user} database={database} />}
     </div>
   )
 }
@@ -190,13 +219,15 @@ const Balance = ({
   currencyBalance,
   currencyType,
   now,
+  database,
 }: {
   userId: UserType["id"]
   currencyBalance: CryptoCurrency["balance"]
   currencyType: CryptoCurrency["type"]
   now: number
+  database: Database
 }) => {
-  const transactions = useTransactionsInvolvingUser(userId)
+  const transactions = useTransactionsInvolvingUser(userId, database)
 
   const balance = transactions?.reduce(
     (sum, { type, amount, sourceUserId, processed, state }) => {
@@ -228,7 +259,15 @@ const CurrencyType = ({ type }: { type: CryptoCurrency["type"] }) => {
   }
 }
 
-const useTransactionsInvolvingUser = (userId: UserType["id"]) => {
+const currencyOptions = currencies.map((currency) => ({
+  value: currency,
+  label: <CurrencyType type={currency} />,
+}))
+
+const useTransactionsInvolvingUser = (
+  userId: UserType["id"],
+  database: Database
+) => {
   const [transactions, setTransactions] = React.useState<Array<
     TransactionType
   > | null>(null)
@@ -240,13 +279,19 @@ const useTransactionsInvolvingUser = (userId: UserType["id"]) => {
       [sourceUserId, targetUserId].includes(userId)
     )
     setTransactions(transactionsInvolvingUser)
-  }, [userId])
+  }, [database.transactions, userId])
 
   return transactions
 }
 
-const TransactionList = ({ user }: { user: UserType }) => {
-  const transactions = useTransactionsInvolvingUser(user.id)
+const TransactionList = ({
+  user,
+  database,
+}: {
+  user: UserType
+  database: Database
+}) => {
+  const transactions = useTransactionsInvolvingUser(user.id, database)
 
   if (transactions === null) {
     return <>Loading...</>
@@ -257,7 +302,7 @@ const TransactionList = ({ user }: { user: UserType }) => {
       {transactions.length > 0 ? (
         <ul>
           {transactions.map((transaction) => (
-            <Transaction transaction={transaction} />
+            <Transaction transaction={transaction} database={database} />
           ))}
         </ul>
       ) : (
@@ -267,25 +312,137 @@ const TransactionList = ({ user }: { user: UserType }) => {
   )
 }
 
-const Transaction = ({ transaction }: { transaction: TransactionType }) => {
+const Transaction = ({
+  transaction,
+  database,
+}: {
+  transaction: TransactionType
+  database: Database
+}) => {
   return (
     <li>
       {transaction.state === "processed" ? "Successfull:" : null}
       {transaction.state === "invalid" ? "Failed:" : null}
-      <UserRepresentation id={transaction.sourceUserId} /> sent{" "}
-      {transaction.amount} <CurrencyType type={transaction.type} /> to{" "}
-      <UserRepresentation id={transaction.targetUserId} />
+      <UserRepresentation
+        id={transaction.sourceUserId}
+        database={database}
+      />{" "}
+      sent {transaction.amount} <CurrencyType type={transaction.type} /> to{" "}
+      <UserRepresentation id={transaction.targetUserId} database={database} />
     </li>
   )
 }
 
-const UserRepresentation = ({ id }: { id: UserType["id"] }) => {
+const UserRepresentation = ({
+  id,
+  database,
+}: {
+  id: UserType["id"]
+  database: Database
+}) => {
   const user = database.users[id]
 
   if (!user) {
     return <>user not found</>
   }
   return <span title={user.email}>{user.name}</span>
+}
+
+const NewTransactionForm = ({
+  onApply,
+  database,
+}: {
+  onApply: (transaction: TransactionType) => void
+  database: Database
+}) => {
+  const [users, setUsers] = React.useState<Array<UserType> | null>(null)
+
+  React.useEffect(() => {
+    setUsers(map(database.users))
+  }, [database.users])
+
+  const [targetUserId, setTargetUserId] = React.useState<UserType["id"] | null>(
+    null
+  )
+  const [sourceUserId, setSourceUserId] = React.useState<UserType["id"] | null>(
+    null
+  )
+
+  const [amount, setAmount] = React.useState<number>(0)
+
+  const [currency, setCurrency] = React.useState<CryptoCurrency["type"]>(
+    currencies[0]
+  )
+
+  const userOptions = (users ?? []).map((user) => ({
+    value: user.id,
+    label: <UserRepresentation id={user.id} database={database} />,
+  }))
+  return (
+    <>
+      <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+          Source
+          <Select
+            options={userOptions}
+            value={userOptions.find(({ value }) => sourceUserId === value)}
+            onChange={(newValue: any) => {
+              setSourceUserId(newValue?.value ?? null)
+            }}
+          />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+          Target
+          <Select
+            options={userOptions}
+            value={userOptions.find(({ value }) => targetUserId === value)}
+            onChange={(newValue: any) => {
+              setTargetUserId(newValue?.value ?? null)
+            }}
+          />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+          Amount
+          <input
+            type="number"
+            value={amount}
+            onChange={(event) => {
+              setAmount(event.target.valueAsNumber)
+            }}
+          />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+          Currency
+          <Select
+            options={currencyOptions}
+            value={currencyOptions.find(({ value }) => currency === value)}
+            onChange={(newValue: any) => {
+              setCurrency(newValue?.value ?? null)
+            }}
+          />
+        </div>
+      </div>
+      {sourceUserId !== null && targetUserId !== null && (
+        <button
+          type="button"
+          onClick={() =>
+            onApply({
+              id: uniqueId(),
+              amount,
+              type: currency,
+              sourceUserId,
+              targetUserId,
+              created: Date.now(),
+              processed: null,
+              state: null,
+            })
+          }
+        >
+          Apply
+        </button>
+      )}
+    </>
+  )
 }
 
 export default App
