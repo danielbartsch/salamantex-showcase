@@ -1,5 +1,5 @@
 import React from "react"
-import { map, uniqueId, initial, sortBy, flatMap } from "lodash"
+import { map, uniqueId, sortBy, flatMap } from "lodash"
 import Select from "react-select"
 import {
   User as UserType,
