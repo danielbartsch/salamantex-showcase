@@ -1,5 +1,5 @@
 import React from "react"
-import { map, uniqueId } from "lodash"
+import { map, uniqueId, initial } from "lodash"
 import Select from "react-select"
 import {
   User as UserType,
@@ -114,6 +114,8 @@ const initialDatabase: Database = {
   },
 }
 
+const DatabaseContext = React.createContext(initialDatabase)
+
 function App() {
   const [currentDatabase, setDatabase] = React.useState<Database>(
     initialDatabase
@@ -126,20 +128,19 @@ function App() {
   }, [currentDatabase.users])
 
   return (
-    <>
+    <DatabaseContext.Provider value={currentDatabase}>
       <h3>Users</h3>
       <div>
         {users === null ? (
           "Loading..."
         ) : users.length > 0 ? (
-          <UserList users={users} database={currentDatabase} />
+          <UserList users={users} />
         ) : (
           "No users saved"
         )}
       </div>
       <div>
         <NewTransactionForm
-          database={currentDatabase}
           onApply={(transaction) =>
             setDatabase((prev) => ({
               ...prev,
@@ -151,30 +152,24 @@ function App() {
           }
         />
       </div>
-    </>
+    </DatabaseContext.Provider>
   )
 }
 
-const UserList = ({
-  users,
-  database,
-}: {
-  users: Array<UserType>
-  database: Database
-}) => (
+const UserList = ({ users }: { users: Array<UserType> }) => (
   <>
     {users.map((user) => (
-      <User user={user} database={database} />
+      <User user={user} />
     ))}
   </>
 )
 
-const User = ({ user, database }: { user: UserType; database: Database }) => {
+const User = ({ user }: { user: UserType }) => {
   const [showDetails, setShowDetails] = React.useState(false)
   const [showTransactions, setShowTransactions] = React.useState(false)
   return (
     <div>
-      <UserRepresentation id={user.id} database={database} />
+      <UserRepresentation id={user.id} />
       <button onClick={() => setShowDetails((prev) => !prev)}>
         Show details
       </button>
@@ -197,7 +192,6 @@ const User = ({ user, database }: { user: UserType; database: Database }) => {
                     currencyBalance={currency.balance}
                     currencyType={currency.type}
                     now={Date.now()}
-                    database={database}
                   />
                 </div>
                 <div>
@@ -209,7 +203,7 @@ const User = ({ user, database }: { user: UserType; database: Database }) => {
           </div>
         </div>
       )}
-      {showTransactions && <TransactionList user={user} database={database} />}
+      {showTransactions && <TransactionList user={user} />}
     </div>
   )
 }
@@ -219,15 +213,13 @@ const Balance = ({
   currencyBalance,
   currencyType,
   now,
-  database,
 }: {
   userId: UserType["id"]
   currencyBalance: CryptoCurrency["balance"]
   currencyType: CryptoCurrency["type"]
   now: number
-  database: Database
 }) => {
-  const transactions = useTransactionsInvolvingUser(userId, database)
+  const transactions = useTransactionsInvolvingUser(userId)
 
   const balance = transactions?.reduce(
     (sum, { type, amount, sourceUserId, processed, state }) => {
@@ -264,13 +256,12 @@ const currencyOptions = currencies.map((currency) => ({
   label: <CurrencyType type={currency} />,
 }))
 
-const useTransactionsInvolvingUser = (
-  userId: UserType["id"],
-  database: Database
-) => {
+const useTransactionsInvolvingUser = (userId: UserType["id"]) => {
   const [transactions, setTransactions] = React.useState<Array<
     TransactionType
   > | null>(null)
+
+  const database = React.useContext(DatabaseContext)
 
   React.useEffect(() => {
     const transactionsInvolvingUser = map(
@@ -284,14 +275,8 @@ const useTransactionsInvolvingUser = (
   return transactions
 }
 
-const TransactionList = ({
-  user,
-  database,
-}: {
-  user: UserType
-  database: Database
-}) => {
-  const transactions = useTransactionsInvolvingUser(user.id, database)
+const TransactionList = ({ user }: { user: UserType }) => {
+  const transactions = useTransactionsInvolvingUser(user.id)
 
   if (transactions === null) {
     return <>Loading...</>
@@ -302,7 +287,7 @@ const TransactionList = ({
       {transactions.length > 0 ? (
         <ul>
           {transactions.map((transaction) => (
-            <Transaction transaction={transaction} database={database} />
+            <Transaction transaction={transaction} />
           ))}
         </ul>
       ) : (
@@ -312,34 +297,21 @@ const TransactionList = ({
   )
 }
 
-const Transaction = ({
-  transaction,
-  database,
-}: {
-  transaction: TransactionType
-  database: Database
-}) => {
+const Transaction = ({ transaction }: { transaction: TransactionType }) => {
   return (
     <li>
       {transaction.state === "processed" ? "Successfull:" : null}
       {transaction.state === "invalid" ? "Failed:" : null}
-      <UserRepresentation
-        id={transaction.sourceUserId}
-        database={database}
-      />{" "}
-      sent {transaction.amount} <CurrencyType type={transaction.type} /> to{" "}
-      <UserRepresentation id={transaction.targetUserId} database={database} />
+      <UserRepresentation id={transaction.sourceUserId} /> sent{" "}
+      {transaction.amount} <CurrencyType type={transaction.type} /> to{" "}
+      <UserRepresentation id={transaction.targetUserId} />
     </li>
   )
 }
 
-const UserRepresentation = ({
-  id,
-  database,
-}: {
-  id: UserType["id"]
-  database: Database
-}) => {
+const UserRepresentation = ({ id }: { id: UserType["id"] }) => {
+  const database = React.useContext(DatabaseContext)
+
   const user = database.users[id]
 
   if (!user) {
@@ -350,12 +322,11 @@ const UserRepresentation = ({
 
 const NewTransactionForm = ({
   onApply,
-  database,
 }: {
   onApply: (transaction: TransactionType) => void
-  database: Database
 }) => {
   const [users, setUsers] = React.useState<Array<UserType> | null>(null)
+  const database = React.useContext(DatabaseContext)
 
   React.useEffect(() => {
     setUsers(map(database.users))
@@ -376,7 +347,7 @@ const NewTransactionForm = ({
 
   const userOptions = (users ?? []).map((user) => ({
     value: user.id,
-    label: <UserRepresentation id={user.id} database={database} />,
+    label: <UserRepresentation id={user.id} />,
   }))
   return (
     <>
