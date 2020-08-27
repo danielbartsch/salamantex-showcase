@@ -1,41 +1,16 @@
 import React from "react"
 import { map } from "lodash"
-
-type CryptoCurrencyType = "bitcoin" | "ethereum"
-
-type CryptoCurrency = {
-  type: CryptoCurrencyType
-  walletId: string
-  balance: number
-  maxTransactionAmount: number
-}
-
-type UserId = string
-type User = {
-  id: UserId
-  name: string
-  description: string
-  email: string
-  currencies: Array<CryptoCurrency>
-}
-
-type TransactionId = string
-type Transaction = {
-  id: TransactionId
-  amount: number
-  type: CryptoCurrencyType
-  sourceUserId: UserId
-  targetUserId: UserId
-  created: number
-  processed: number | null
-  state: "invalid" | "processed" | null
-}
+import {
+  User as UserType,
+  Transaction as TransactionType,
+  CryptoCurrency,
+} from "./types"
 
 type Users = {
-  [key in UserId]: User
+  [key in UserType["id"]]: UserType
 }
 type Transactions = {
-  [key in TransactionId]: Transaction
+  [key in TransactionType["id"]]: TransactionType
 }
 
 const database: { users: Users; transactions: Transactions } = {
@@ -136,7 +111,7 @@ const database: { users: Users; transactions: Transactions } = {
 }
 
 function App() {
-  const [users, setUsers] = React.useState<Array<User> | null>(null)
+  const [users, setUsers] = React.useState<Array<UserType> | null>(null)
 
   React.useEffect(() => {
     setUsers(map(database.users))
@@ -158,7 +133,7 @@ function App() {
   )
 }
 
-const UserList = ({ users }: { users: Array<User> }) => (
+const UserList = ({ users }: { users: Array<UserType> }) => (
   <>
     {users.map((user) => (
       <User user={user} />
@@ -166,7 +141,7 @@ const UserList = ({ users }: { users: Array<User> }) => (
   </>
 )
 
-const User = ({ user }: { user: User }) => {
+const User = ({ user }: { user: UserType }) => {
   const [showDetails, setShowDetails] = React.useState(false)
   const [showTransactions, setShowTransactions] = React.useState(false)
   return (
@@ -213,9 +188,9 @@ const CurrencyType = ({ type }: { type: CryptoCurrency["type"] }) => {
   }
 }
 
-const TransactionList = ({ user }: { user: User }) => {
+const TransactionList = ({ user }: { user: UserType }) => {
   const [transactions, setTransactions] = React.useState<Array<
-    Transaction
+    TransactionType
   > | null>(null)
 
   React.useEffect(() => {
@@ -246,9 +221,11 @@ const TransactionList = ({ user }: { user: User }) => {
   )
 }
 
-const Transaction = ({ transaction }: { transaction: Transaction }) => {
+const Transaction = ({ transaction }: { transaction: TransactionType }) => {
   return (
     <li>
+      {transaction.state === "processed" ? "Successfull:" : null}
+      {transaction.state === "invalid" ? "Failed:" : null}
       <UserRepresentation id={transaction.sourceUserId} /> sent{" "}
       {transaction.amount} <CurrencyType type={transaction.type} /> to{" "}
       <UserRepresentation id={transaction.targetUserId} />
@@ -256,7 +233,7 @@ const Transaction = ({ transaction }: { transaction: Transaction }) => {
   )
 }
 
-const UserRepresentation = ({ id }: { id: UserId }) => {
+const UserRepresentation = ({ id }: { id: UserType["id"] }) => {
   const user = database.users[id]
 
   if (!user) {
