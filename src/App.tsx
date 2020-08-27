@@ -162,7 +162,15 @@ const User = ({ user }: { user: UserType }) => {
                 <div>
                   <CurrencyType {...currency} />
                 </div>
-                <div>Balance: {currency.balance}</div>
+                <div>
+                  Balance:{" "}
+                  <Balance
+                    userId={user.id}
+                    currencyBalance={currency.balance}
+                    currencyType={currency.type}
+                    now={Date.now()}
+                  />
+                </div>
                 <div>
                   Maximum amount in a single transaction:{" "}
                   {currency.maxTransactionAmount}
@@ -177,6 +185,38 @@ const User = ({ user }: { user: UserType }) => {
   )
 }
 
+const Balance = ({
+  userId,
+  currencyBalance,
+  currencyType,
+  now,
+}: {
+  userId: UserType["id"]
+  currencyBalance: CryptoCurrency["balance"]
+  currencyType: CryptoCurrency["type"]
+  now: number
+}) => {
+  const transactions = useTransactionsInvolvingUser(userId)
+
+  const balance = transactions?.reduce(
+    (sum, { type, amount, sourceUserId, processed, state }) => {
+      if (
+        type === currencyType &&
+        state === "processed" &&
+        processed !== null &&
+        processed < now
+      ) {
+        return sum + (sourceUserId === userId ? -amount : amount)
+      }
+
+      return sum
+    },
+    currencyBalance ?? 0
+  )
+
+  return <>{balance}</>
+}
+
 const CurrencyType = ({ type }: { type: CryptoCurrency["type"] }) => {
   switch (type) {
     case "ethereum":
@@ -188,7 +228,7 @@ const CurrencyType = ({ type }: { type: CryptoCurrency["type"] }) => {
   }
 }
 
-const TransactionList = ({ user }: { user: UserType }) => {
+const useTransactionsInvolvingUser = (userId: UserType["id"]) => {
   const [transactions, setTransactions] = React.useState<Array<
     TransactionType
   > | null>(null)
@@ -197,10 +237,16 @@ const TransactionList = ({ user }: { user: UserType }) => {
     const transactionsInvolvingUser = map(
       database.transactions
     ).filter(({ sourceUserId, targetUserId }) =>
-      [sourceUserId, targetUserId].includes(user.id)
+      [sourceUserId, targetUserId].includes(userId)
     )
     setTransactions(transactionsInvolvingUser)
-  }, [user])
+  }, [userId])
+
+  return transactions
+}
+
+const TransactionList = ({ user }: { user: UserType }) => {
+  const transactions = useTransactionsInvolvingUser(user.id)
 
   if (transactions === null) {
     return <>Loading...</>
