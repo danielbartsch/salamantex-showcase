@@ -7,6 +7,19 @@ import { UserRepresentation } from "./UserRepresentation"
 import { CurrencyType } from "./CurrencyType"
 import { currencies } from "../constants"
 
+const InputBox = ({
+  label,
+  children,
+}: {
+  label: React.ReactNode
+  children: React.ReactNode
+}) => (
+  <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+    <div>{label}</div>
+    <div>{children}</div>
+  </div>
+)
+
 export const TransactionForm = ({
   onApply,
 }: {
@@ -39,8 +52,7 @@ export const TransactionForm = ({
   return (
     <>
       <div style={{ display: "flex" }}>
-        <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-          Source
+        <InputBox label="Source">
           <Select
             options={
               targetUserId
@@ -52,9 +64,8 @@ export const TransactionForm = ({
               setSourceUserId(newValue?.value ?? null)
             }}
           />
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-          Target
+        </InputBox>
+        <InputBox label="Target">
           <Select
             options={
               sourceUserId
@@ -66,9 +77,8 @@ export const TransactionForm = ({
               setTargetUserId(newValue?.value ?? null)
             }}
           />
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-          Amount
+        </InputBox>
+        <InputBox label="Amount">
           <input
             type="number"
             value={amount}
@@ -77,9 +87,8 @@ export const TransactionForm = ({
             }}
             min={0}
           />
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-          Currency
+        </InputBox>
+        <InputBox label="Currency">
           <Select
             options={currencyOptions}
             value={currencyOptions.find(({ value }) => currency === value)}
@@ -87,7 +96,7 @@ export const TransactionForm = ({
               setCurrency(newValue?.value ?? null)
             }}
           />
-        </div>
+        </InputBox>
       </div>
       {sourceUserId !== null && targetUserId !== null && amount !== 0 && (
         <button
