@@ -1,11 +1,45 @@
 import * as React from "react"
-import Select from "react-select"
+import ReactSelect from "react-select"
 import { map, uniqueId } from "lodash"
 import { Transaction, User, CryptoCurrency } from "../types"
 import { DatabaseContext } from "../globals"
 import { UserRepresentation } from "./UserRepresentation"
 import { CurrencyType } from "./CurrencyType"
 import { currencies } from "../constants"
+
+const customReactSelectStyles: React.ComponentProps<
+  typeof ReactSelect
+>["styles"] = {
+  control: (provided, haja) => {
+    console.log(provided, haja)
+
+    return {
+      ...provided,
+      "&:hover": {
+        backgroundColor: "#eee",
+      },
+      transition: undefined,
+      minHeight: 32,
+      height: 32,
+      border: "1px solid black",
+      borderRadius: 2,
+    }
+  },
+  container: (provided) => {
+    return {
+      ...provided,
+      height: 32,
+      minHeight: 32,
+    }
+  },
+  dropdownIndicator: () => ({ display: "none" }),
+  indicatorSeparator: () => ({ display: "none" }),
+  indicatorsContainer: () => ({ display: "none" }),
+}
+
+const Select = (props: React.ComponentProps<typeof ReactSelect>) => (
+  <ReactSelect styles={customReactSelectStyles} {...props} />
+)
 
 const InputBox = ({
   label,
@@ -16,7 +50,7 @@ const InputBox = ({
 }) => (
   <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
     <div>{label}</div>
-    <div>{children}</div>
+    {children}
   </div>
 )
 
@@ -113,6 +147,7 @@ export const TransactionForm = ({
               state: null,
             })
           }
+          style={{ marginTop: "1em" }}
         >
           Apply
         </button>
