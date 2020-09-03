@@ -24,7 +24,18 @@ export const App = () => {
   return (
     <DatabaseContext.Provider value={currentDatabase}>
       <div style={{ paddingLeft: "2em", paddingRight: "2em" }}>
-        <h3>Users</h3>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <h3>Users</h3>
+          <button onClick={() => setShowTransactionForm(true)}>
+            + Transaction
+          </button>
+        </div>
         <div>
           {users === null
             ? "Loading..."
@@ -32,9 +43,7 @@ export const App = () => {
             ? users.map((user) => <User key={user.id} user={user} />)
             : "No users saved"}
         </div>
-        <button onClick={() => setShowTransactionForm(true)}>
-          + Transaction
-        </button>
+
         {showTransactionForm && (
           <Modal
             title="Create a new Transaction"
