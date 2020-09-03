@@ -10,6 +10,23 @@ import {
 import { DatabaseContext } from "../globals"
 import { getBalance } from "../utils"
 
+const Box = (props: React.ComponentProps<"div">) => (
+  <div
+    {...props}
+    style={{
+      backgroundColor: "#fefeff",
+      borderTop: "4px solid #eef",
+      borderRight: "1px solid #dde",
+      borderLeft: "1px solid #dde",
+      borderBottom: "1px solid #eef",
+      borderRadius: 2,
+      boxShadow: "0px 1px 5px #0013",
+      padding: 4,
+      ...props.style,
+    }}
+  />
+)
+
 export const User = ({ user }: { user: UserType }) => {
   const [showDetails, setShowDetails] = React.useState(false)
   const [showTransactions, setShowTransactions] = React.useState(false)
@@ -23,31 +40,34 @@ export const User = ({ user }: { user: UserType }) => {
         Show transactions
       </button>
       {showDetails && (
-        <div>
-          <div>{user.description}</div>
-          <div>
-            {user.currencies.map((currency) => (
-              <div key={currency.walletId}>
-                <div>
-                  <CurrencyType {...currency} />
-                </div>
-                <div>
-                  Balance:{" "}
-                  <Balance
-                    userId={user.id}
-                    currencyBalance={currency.balance}
-                    currencyType={currency.type}
-                    now={Date.now()}
-                  />
-                </div>
-                <div>
-                  Maximum amount in a single transaction:{" "}
-                  {currency.maxTransactionAmount}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <Box>
+          <div style={{ textDecoration: "underline" }}>{user.description}</div>
+          <table>
+            <thead>
+              <th>Currency</th>
+              <th>Balance</th>
+              <th>Transaction limit</th>
+            </thead>
+            <tbody>
+              {user.currencies.map((currency) => (
+                <tr key={currency.walletId}>
+                  <td>
+                    <CurrencyType {...currency} />
+                  </td>
+                  <td>
+                    <Balance
+                      userId={user.id}
+                      currencyBalance={currency.balance}
+                      currencyType={currency.type}
+                      now={Date.now()}
+                    />
+                  </td>
+                  <td>{currency.maxTransactionAmount}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Box>
       )}
       {showTransactions && <TransactionList user={user} />}
     </div>
@@ -98,7 +118,16 @@ const Balance = ({
   currencyType: CryptoCurrency["type"]
   now: number
 }) => {
-  return <>{useBalance(userId, currencyBalance, currencyType, now)}</>
+  const balance = useBalance(userId, currencyBalance, currencyType, now)
+  return (
+    <span
+      style={{
+        color: balance > 0 ? "#4a4" : balance === 0 ? undefined : "#a44",
+      }}
+    >
+      {balance}
+    </span>
+  )
 }
 
 const TransactionList = ({ user }: { user: UserType }) => {
@@ -111,28 +140,19 @@ const TransactionList = ({ user }: { user: UserType }) => {
   return (
     <>
       {transactions.length > 0 ? (
-        <table
-          style={{
-            backgroundColor: "#fefeff",
-            borderTop: "4px solid #eef",
-            borderRight: "1px solid #dde",
-            borderLeft: "1px solid #dde",
-            borderBottom: "1px solid #eef",
-            borderRadius: 2,
-            boxShadow: "0px 1px 5px #0013",
-            padding: 4,
-          }}
-        >
-          <tbody>
-            {transactions.map((transaction) => (
-              <Transaction
-                key={transaction.id}
-                meId={user.id}
-                transaction={transaction}
-              />
-            ))}
-          </tbody>
-        </table>
+        <Box>
+          <table>
+            <tbody>
+              {transactions.map((transaction) => (
+                <Transaction
+                  key={transaction.id}
+                  meId={user.id}
+                  transaction={transaction}
+                />
+              ))}
+            </tbody>
+          </table>
+        </Box>
       ) : (
         "No transactions found..."
       )}
