@@ -1,4 +1,5 @@
 import * as React from "react"
+import { CrossIcon } from "./CrossIcon"
 
 export const Modal = ({
   title,
@@ -49,7 +50,9 @@ export const Modal = ({
         }}
       >
         <div>{title}</div>
-        <button onClick={onClose}>Close</button>
+        <button onClick={onClose} style={{ border: "none" }}>
+          <CrossIcon fill="#222" />
+        </button>
       </div>
       <div style={{ overflowY: "auto", flexGrow: 1 }}>{children}</div>
     </div>

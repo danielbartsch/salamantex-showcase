@@ -3,6 +3,7 @@ import { map, sortBy } from "lodash"
 import { CurrencyType } from "./CurrencyType"
 import { UserRepresentation } from "./UserRepresentation"
 import { Modal } from "./Modal"
+import { CrossIcon } from "./CrossIcon"
 import {
   User as UserType,
   Transaction as TransactionType,
@@ -210,12 +211,7 @@ const TransactionState = ({ state }: { state: TransactionType["state"] }) => {
     case "invalid":
       return (
         <td title="Failed transaction">
-          <svg viewBox="0 0 12 12" width="12" height="12">
-            <path
-              d="m2,0 l-2,2 l10,10 l2,-2 l-10,-10z M12,2 l-2,-2 l-10,10 l2,2 l-10,10z"
-              fill="#a44"
-            />
-          </svg>
+          <CrossIcon fill="#a44" />
         </td>
       )
     default:
