@@ -67,6 +67,7 @@ export const TransactionForm = ({
             onChange={(event) => {
               setAmount(event.target.valueAsNumber)
             }}
+            min={0}
           />
         </div>
         <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
@@ -80,7 +81,7 @@ export const TransactionForm = ({
           />
         </div>
       </div>
-      {sourceUserId !== null && targetUserId !== null && (
+      {sourceUserId !== null && targetUserId !== null && amount !== 0 && (
         <button
           type="button"
           onClick={() =>
