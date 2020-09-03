@@ -18,7 +18,10 @@ export const User = ({ user }: { user: UserType }) => {
     <>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <UserRepresentation id={user.id} />
-        <div>
+        <div
+          className="group"
+          style={{ paddingTop: "0.1em", paddingBottom: "0.1em" }}
+        >
           <button onClick={() => setShowSummary((prev) => !prev)}>
             Summary
           </button>
