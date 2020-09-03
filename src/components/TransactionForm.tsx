@@ -42,7 +42,11 @@ export const TransactionForm = ({
         <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
           Source
           <Select
-            options={userOptions}
+            options={
+              targetUserId
+                ? userOptions.filter(({ value }) => value !== targetUserId)
+                : userOptions
+            }
             value={userOptions.find(({ value }) => sourceUserId === value)}
             onChange={(newValue: any) => {
               setSourceUserId(newValue?.value ?? null)
@@ -52,7 +56,11 @@ export const TransactionForm = ({
         <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
           Target
           <Select
-            options={userOptions}
+            options={
+              sourceUserId
+                ? userOptions.filter(({ value }) => value !== sourceUserId)
+                : userOptions
+            }
             value={userOptions.find(({ value }) => targetUserId === value)}
             onChange={(newValue: any) => {
               setTargetUserId(newValue?.value ?? null)
