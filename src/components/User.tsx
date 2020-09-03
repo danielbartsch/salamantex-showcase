@@ -111,7 +111,7 @@ const TransactionList = ({ user }: { user: UserType }) => {
   return (
     <>
       {transactions.length > 0 ? (
-        <div
+        <table
           style={{
             backgroundColor: "#fefeff",
             borderTop: "4px solid #eef",
@@ -123,14 +123,16 @@ const TransactionList = ({ user }: { user: UserType }) => {
             padding: 4,
           }}
         >
-          {transactions.map((transaction) => (
-            <Transaction
-              key={transaction.id}
-              meId={user.id}
-              transaction={transaction}
-            />
-          ))}
-        </div>
+          <tbody>
+            {transactions.map((transaction) => (
+              <Transaction
+                key={transaction.id}
+                meId={user.id}
+                transaction={transaction}
+              />
+            ))}
+          </tbody>
+        </table>
       ) : (
         "No transactions found..."
       )}
@@ -194,21 +196,35 @@ const Transaction = ({
   meId: UserType["id"]
 }) => {
   return (
-    <div>
-      <TransactionState state={transaction.state} />
+    <tr>
+      <td>
+        <TransactionState state={transaction.state} />
+      </td>
       {meId === transaction.sourceUserId ? (
         <>
-          <Arrow direction="right" color="#a44" /> {transaction.amount}{" "}
-          <CurrencyType type={transaction.type} />{" "}
-          <UserRepresentation id={transaction.targetUserId} />
+          <td>
+            <Arrow direction="right" color="#a44" />
+          </td>
+          <td>
+            {transaction.amount} <CurrencyType type={transaction.type} />
+          </td>
+          <td>
+            <UserRepresentation id={transaction.targetUserId} />
+          </td>
         </>
       ) : (
         <>
-          <Arrow color="#4a4" /> {transaction.amount}{" "}
-          <CurrencyType type={transaction.type} />{" "}
-          <UserRepresentation id={transaction.sourceUserId} />
+          <td>
+            <Arrow color="#4a4" />
+          </td>
+          <td>
+            {transaction.amount} <CurrencyType type={transaction.type} />
+          </td>
+          <td>
+            <UserRepresentation id={transaction.sourceUserId} />
+          </td>
         </>
       )}
-    </div>
+    </tr>
   )
 }
