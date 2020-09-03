@@ -23,36 +23,38 @@ export const App = () => {
 
   return (
     <DatabaseContext.Provider value={currentDatabase}>
-      <h3>Users</h3>
-      <div>
-        {users === null
-          ? "Loading..."
-          : users.length > 0
-          ? users.map((user) => <User key={user.id} user={user} />)
-          : "No users saved"}
+      <div style={{ paddingLeft: "2em", paddingRight: "2em" }}>
+        <h3>Users</h3>
+        <div>
+          {users === null
+            ? "Loading..."
+            : users.length > 0
+            ? users.map((user) => <User key={user.id} user={user} />)
+            : "No users saved"}
+        </div>
+        <button onClick={() => setShowTransactionForm(true)}>
+          + Transaction
+        </button>
+        {showTransactionForm && (
+          <Modal
+            title="Create a new Transaction"
+            onClose={() => setShowTransactionForm((prev) => !prev)}
+          >
+            <TransactionForm
+              onApply={(transaction) => {
+                setDatabase((prev) => ({
+                  ...prev,
+                  transactions: {
+                    ...prev.transactions,
+                    [transaction.id]: transaction,
+                  },
+                }))
+                setShowTransactionForm(false)
+              }}
+            />
+          </Modal>
+        )}
       </div>
-      <button onClick={() => setShowTransactionForm(true)}>
-        + Transaction
-      </button>
-      {showTransactionForm && (
-        <Modal
-          title="Create a new Transaction"
-          onClose={() => setShowTransactionForm((prev) => !prev)}
-        >
-          <TransactionForm
-            onApply={(transaction) => {
-              setDatabase((prev) => ({
-                ...prev,
-                transactions: {
-                  ...prev.transactions,
-                  [transaction.id]: transaction,
-                },
-              }))
-              setShowTransactionForm(false)
-            }}
-          />
-        </Modal>
-      )}
     </DatabaseContext.Provider>
   )
 }
