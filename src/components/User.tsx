@@ -10,38 +10,90 @@ import {
 import { DatabaseContext } from "../globals"
 import { getBalance } from "../utils"
 
-const Box = (props: React.ComponentProps<"div">) => (
-  <div
-    {...props}
-    style={{
-      backgroundColor: "#fefeff",
-      borderTop: "4px solid #eef",
-      borderRight: "1px solid #dde",
-      borderLeft: "1px solid #dde",
-      borderBottom: "1px solid #eef",
-      borderRadius: 2,
-      boxShadow: "0px 1px 5px #0013",
-      padding: 4,
-      ...props.style,
-    }}
-  />
+const Modal = ({
+  title,
+  children,
+  onClose,
+}: {
+  title: React.ReactNode
+  children: React.ReactNode
+  onClose?: () => void
+}) => (
+  <>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        height: "100vh",
+        width: "100vw",
+        backgroundColor: "rgba(0,0,0,0.4)",
+        zIndex: 1,
+      }}
+      onClick={onClose}
+    />
+    <div
+      style={{
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "75%",
+        minWidth: 500,
+        height: "50%",
+        minHeight: 300,
+        backgroundColor: "white",
+        display: "flex",
+        flexDirection: "column",
+        borderRadius: 2,
+        padding: "2em",
+        zIndex: 2,
+      }}
+    >
+      <div
+        style={{
+          fontSize: "1.33em",
+          marginBottom: "0.5em",
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <div>{title}</div>
+        <button onClick={onClose}>Close</button>
+      </div>
+      <div>{children}</div>
+    </div>
+  </>
 )
 
 export const User = ({ user }: { user: UserType }) => {
   const [showDetails, setShowDetails] = React.useState(false)
   const [showTransactions, setShowTransactions] = React.useState(false)
   return (
-    <div>
-      <UserRepresentation id={user.id} />
-      <button onClick={() => setShowDetails((prev) => !prev)}>
-        Show details
-      </button>
-      <button onClick={() => setShowTransactions((prev) => !prev)}>
-        Show transactions
-      </button>
+    <>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <UserRepresentation id={user.id} />
+        <div>
+          <button onClick={() => setShowDetails((prev) => !prev)}>
+            Show details
+          </button>
+          <button onClick={() => setShowTransactions((prev) => !prev)}>
+            Show transactions
+          </button>
+        </div>
+      </div>
       {showDetails && (
-        <Box>
-          <div style={{ textDecoration: "underline" }}>{user.description}</div>
+        <Modal
+          title={
+            <>
+              Summary of <UserRepresentation id={user.id} />
+            </>
+          }
+          onClose={() => setShowDetails((prev) => !prev)}
+        >
+          <div style={{ textDecoration: "underline", marginBottom: "0.75em" }}>
+            {user.description}
+          </div>
           <table>
             <thead>
               <th>Currency</th>
@@ -67,10 +119,21 @@ export const User = ({ user }: { user: UserType }) => {
               ))}
             </tbody>
           </table>
-        </Box>
+        </Modal>
       )}
-      {showTransactions && <TransactionList user={user} />}
-    </div>
+      {showTransactions && (
+        <Modal
+          title={
+            <>
+              Transactions of <UserRepresentation id={user.id} />
+            </>
+          }
+          onClose={() => setShowTransactions((prev) => !prev)}
+        >
+          <TransactionList user={user} />
+        </Modal>
+      )}
+    </>
   )
 }
 
@@ -140,19 +203,24 @@ const TransactionList = ({ user }: { user: UserType }) => {
   return (
     <>
       {transactions.length > 0 ? (
-        <Box>
-          <table>
-            <tbody>
-              {transactions.map((transaction) => (
-                <Transaction
-                  key={transaction.id}
-                  meId={user.id}
-                  transaction={transaction}
-                />
-              ))}
-            </tbody>
-          </table>
-        </Box>
+        <table>
+          <thead>
+            <th></th>
+            <th></th>
+            <th>Amount</th>
+            <th>Currency</th>
+            <th>Recipient/Sender</th>
+          </thead>
+          <tbody>
+            {transactions.map((transaction) => (
+              <Transaction
+                key={transaction.id}
+                meId={user.id}
+                transaction={transaction}
+              />
+            ))}
+          </tbody>
+        </table>
       ) : (
         "No transactions found..."
       )}
@@ -185,25 +253,31 @@ const TransactionState = ({ state }: { state: TransactionType["state"] }) => {
   switch (state) {
     case "processed":
       return (
-        <svg viewBox="0 0 12 12" width="12" height="12">
-          <path d="m9,1 l2,2 l-7,7 l-4,-4 l2,-2 l2,2z" fill="#4a4" />
-        </svg>
+        <td title="Successful transaction">
+          <svg viewBox="0 0 12 12" width="12" height="12">
+            <path d="m9,1 l2,2 l-7,7 l-4,-4 l2,-2 l2,2z" fill="#4a4" />
+          </svg>
+        </td>
       )
     case "invalid":
       return (
-        <svg viewBox="0 0 12 12" width="12" height="12">
-          <path
-            d="m2,0 l-2,2 l10,10 l2,-2 l-10,-10z M12,2 l-2,-2 l-10,10 l2,2 l-10,10z"
-            fill="#a44"
-          />
-        </svg>
+        <td title="Failed transaction">
+          <svg viewBox="0 0 12 12" width="12" height="12">
+            <path
+              d="m2,0 l-2,2 l10,10 l2,-2 l-10,-10z M12,2 l-2,-2 l-10,10 l2,2 l-10,10z"
+              fill="#a44"
+            />
+          </svg>
+        </td>
       )
     default:
       return (
-        <svg viewBox="0 0 12 12" width="12" height="12" className="rotate">
-          <circle r="2" cx="6" cy="2" fill="#aaa" />
-          <circle r="2" cx="6" cy="10" fill="#aaa" />
-        </svg>
+        <td title="Transaction to be processed">
+          <svg viewBox="0 0 12 12" width="12" height="12" className="rotate">
+            <circle r="2" cx="6" cy="2" fill="#aaa" />
+            <circle r="2" cx="6" cy="10" fill="#aaa" />
+          </svg>
+        </td>
       )
   }
 }
@@ -217,16 +291,15 @@ const Transaction = ({
 }) => {
   return (
     <tr>
-      <td>
-        <TransactionState state={transaction.state} />
-      </td>
+      <TransactionState state={transaction.state} />
       {meId === transaction.sourceUserId ? (
         <>
-          <td>
+          <td title="sent">
             <Arrow direction="right" color="#a44" />
           </td>
+          <td>{transaction.amount}</td>
           <td>
-            {transaction.amount} <CurrencyType type={transaction.type} />
+            <CurrencyType type={transaction.type} />
           </td>
           <td>
             <UserRepresentation id={transaction.targetUserId} />
@@ -234,11 +307,12 @@ const Transaction = ({
         </>
       ) : (
         <>
-          <td>
+          <td title="received">
             <Arrow color="#4a4" />
           </td>
+          <td>{transaction.amount}</td>
           <td>
-            {transaction.amount} <CurrencyType type={transaction.type} />
+            <CurrencyType type={transaction.type} />
           </td>
           <td>
             <UserRepresentation id={transaction.sourceUserId} />
