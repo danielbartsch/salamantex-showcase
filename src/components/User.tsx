@@ -1,5 +1,5 @@
 import * as React from "react"
-import { map } from "lodash"
+import { map, sortBy } from "lodash"
 import { CurrencyType } from "./CurrencyType"
 import { UserRepresentation } from "./UserRepresentation"
 import { Modal } from "./Modal"
@@ -12,29 +12,29 @@ import { DatabaseContext } from "../globals"
 import { getBalance } from "../utils"
 
 export const User = ({ user }: { user: UserType }) => {
-  const [showDetails, setShowDetails] = React.useState(false)
+  const [showSummary, setShowSummary] = React.useState(false)
   const [showTransactions, setShowTransactions] = React.useState(false)
   return (
     <>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <UserRepresentation id={user.id} />
         <div>
-          <button onClick={() => setShowDetails((prev) => !prev)}>
-            Show details
+          <button onClick={() => setShowSummary((prev) => !prev)}>
+            Summary
           </button>
           <button onClick={() => setShowTransactions((prev) => !prev)}>
-            Show transactions
+            Transactions
           </button>
         </div>
       </div>
-      {showDetails && (
+      {showSummary && (
         <Modal
           title={
             <>
               Summary of <UserRepresentation id={user.id} />
             </>
           }
-          onClose={() => setShowDetails((prev) => !prev)}
+          onClose={() => setShowSummary((prev) => !prev)}
         >
           <div style={{ textDecoration: "underline", marginBottom: "0.75em" }}>
             {user.description}
@@ -157,13 +157,15 @@ const TransactionList = ({ user }: { user: UserType }) => {
             <th>Recipient/Sender</th>
           </thead>
           <tbody>
-            {transactions.map((transaction) => (
-              <Transaction
-                key={transaction.id}
-                meId={user.id}
-                transaction={transaction}
-              />
-            ))}
+            {sortBy(transactions, ({ created }) => -created).map(
+              (transaction) => (
+                <Transaction
+                  key={transaction.id}
+                  meId={user.id}
+                  transaction={transaction}
+                />
+              )
+            )}
           </tbody>
         </table>
       ) : (
