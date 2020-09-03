@@ -6,15 +6,14 @@ import { currencies } from "../constants"
 import { getCurrencyString } from "../utils"
 
 const Select = ({
-  value,
-  onChange,
   options,
-}: {
-  value: string | undefined
+  onChange,
+  ...props
+}: Omit<React.ComponentProps<"select">, "onChange"> & {
   onChange: (value: string) => void
   options: Array<{ value: string; label: React.ReactNode }>
 }) => (
-  <select onChange={(event) => onChange(event.target.value)} value={value}>
+  <select onChange={(event) => onChange(event.target.value)} {...props}>
     {options.map((option) => (
       <option value={option.value} key={String(option.value)}>
         {option.label}
@@ -76,6 +75,9 @@ export const TransactionForm = ({
                 : userOptions
             }
             value={sourceUserId ?? undefined}
+            title={
+              (users ?? []).find((user) => user.id === sourceUserId)?.email
+            }
             onChange={(newValue: any) => {
               setSourceUserId(newValue)
             }}
@@ -89,6 +91,9 @@ export const TransactionForm = ({
                 : userOptions
             }
             value={targetUserId ?? undefined}
+            title={
+              (users ?? []).find((user) => user.id === targetUserId)?.email
+            }
             onChange={(newValue: any) => {
               setTargetUserId(newValue)
             }}
