@@ -1,44 +1,26 @@
 import * as React from "react"
-import ReactSelect from "react-select"
 import { map, uniqueId } from "lodash"
 import { Transaction, User, CryptoCurrency } from "../types"
 import { DatabaseContext } from "../globals"
-import { UserRepresentation } from "./UserRepresentation"
-import { CurrencyType } from "./CurrencyType"
 import { currencies } from "../constants"
+import { getCurrencyString } from "../utils"
 
-const customReactSelectStyles: React.ComponentProps<
-  typeof ReactSelect
->["styles"] = {
-  control: (provided, haja) => {
-    console.log(provided, haja)
-
-    return {
-      ...provided,
-      "&:hover": {
-        backgroundColor: "#eee",
-      },
-      transition: undefined,
-      minHeight: 32,
-      height: 32,
-      border: "1px solid black",
-      borderRadius: 2,
-    }
-  },
-  container: (provided) => {
-    return {
-      ...provided,
-      height: 32,
-      minHeight: 32,
-    }
-  },
-  dropdownIndicator: () => ({ display: "none" }),
-  indicatorSeparator: () => ({ display: "none" }),
-  indicatorsContainer: () => ({ display: "none" }),
-}
-
-const Select = (props: React.ComponentProps<typeof ReactSelect>) => (
-  <ReactSelect styles={customReactSelectStyles} {...props} />
+const Select = ({
+  value,
+  onChange,
+  options,
+}: {
+  value: string | undefined
+  onChange: (value: string) => void
+  options: Array<{ value: string; label: React.ReactNode }>
+}) => (
+  <select onChange={(event) => onChange(event.target.value)} value={value}>
+    {options.map((option) => (
+      <option value={option.value} key={String(option.value)}>
+        {option.label}
+      </option>
+    ))}
+  </select>
 )
 
 const InputBox = ({
@@ -81,7 +63,7 @@ export const TransactionForm = ({
 
   const userOptions = (users ?? []).map((user) => ({
     value: user.id,
-    label: <UserRepresentation id={user.id} />,
+    label: user.name,
   }))
   return (
     <>
@@ -93,9 +75,9 @@ export const TransactionForm = ({
                 ? userOptions.filter(({ value }) => value !== targetUserId)
                 : userOptions
             }
-            value={userOptions.find(({ value }) => sourceUserId === value)}
+            value={sourceUserId ?? undefined}
             onChange={(newValue: any) => {
-              setSourceUserId(newValue?.value ?? null)
+              setSourceUserId(newValue)
             }}
           />
         </InputBox>
@@ -106,9 +88,9 @@ export const TransactionForm = ({
                 ? userOptions.filter(({ value }) => value !== sourceUserId)
                 : userOptions
             }
-            value={userOptions.find(({ value }) => targetUserId === value)}
+            value={targetUserId ?? undefined}
             onChange={(newValue: any) => {
-              setTargetUserId(newValue?.value ?? null)
+              setTargetUserId(newValue)
             }}
           />
         </InputBox>
@@ -125,9 +107,9 @@ export const TransactionForm = ({
         <InputBox label="Currency">
           <Select
             options={currencyOptions}
-            value={currencyOptions.find(({ value }) => currency === value)}
+            value={currency}
             onChange={(newValue: any) => {
-              setCurrency(newValue?.value ?? null)
+              setCurrency(newValue)
             }}
           />
         </InputBox>
@@ -158,5 +140,5 @@ export const TransactionForm = ({
 
 const currencyOptions = currencies.map((currency) => ({
   value: currency,
-  label: <CurrencyType type={currency} />,
+  label: getCurrencyString({ type: currency }),
 }))

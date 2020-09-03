@@ -26,6 +26,21 @@ export const getBalance = (
     currencyBalance ?? 0
   )
 
+export const getCurrencyString = ({
+  type,
+}: {
+  type: CryptoCurrency["type"]
+}) => {
+  switch (type) {
+    case "ethereum":
+      return "Ethereum"
+    case "bitcoin":
+      return "Bitcoin"
+    default:
+      return "currency not found"
+  }
+}
+
 export const useTransactionProcessor = (
   currentDatabase: Database,
   setDatabase: (setter: (state: Database) => Database) => void
