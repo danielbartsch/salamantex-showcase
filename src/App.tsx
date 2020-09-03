@@ -40,7 +40,11 @@ export const App = () => {
           {users === null
             ? "Loading..."
             : users.length > 0
-            ? users.map((user) => <User key={user.id} user={user} />)
+            ? users.map((user) => (
+                <div className="row" key={user.id}>
+                  <User user={user} />
+                </div>
+              ))
             : "No users saved"}
         </div>
 

@@ -27,3 +27,7 @@ code {
     transform: rotate(360deg);
   }
 }
+
+.row:nth-child(even) {
+  background-color: #f8f8f8;
+}

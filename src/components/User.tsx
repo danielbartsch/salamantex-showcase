@@ -47,7 +47,7 @@ export const User = ({ user }: { user: UserType }) => {
             </thead>
             <tbody>
               {user.currencies.map((currency) => (
-                <tr key={currency.walletId}>
+                <tr key={currency.walletId} className="row">
                   <td>
                     <CurrencyType {...currency} />
                   </td>
@@ -159,11 +159,9 @@ const TransactionList = ({ user }: { user: UserType }) => {
           <tbody>
             {sortBy(transactions, ({ created }) => -created).map(
               (transaction) => (
-                <Transaction
-                  key={transaction.id}
-                  meId={user.id}
-                  transaction={transaction}
-                />
+                <tr key={transaction.id} className="row">
+                  <Transaction meId={user.id} transaction={transaction} />
+                </tr>
               )
             )}
           </tbody>
@@ -237,7 +235,7 @@ const Transaction = ({
   meId: UserType["id"]
 }) => {
   return (
-    <tr>
+    <>
       <TransactionState state={transaction.state} />
       {meId === transaction.sourceUserId ? (
         <>
@@ -266,6 +264,6 @@ const Transaction = ({
           </td>
         </>
       )}
-    </tr>
+    </>
   )
 }
