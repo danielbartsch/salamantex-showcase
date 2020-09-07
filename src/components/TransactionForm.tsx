@@ -11,7 +11,7 @@ const Select = ({
   ...props
 }: Omit<React.ComponentProps<"select">, "onChange"> & {
   onChange: (value: string) => void
-  options: Array<{ value: string; label: React.ReactNode }>
+  options: Array<{ value: string; label: string }>
 }) => (
   <select onChange={(event) => onChange(event.target.value)} {...props}>
     {options.map((option) => (
