@@ -31,6 +31,7 @@ export const Modal = ({
         transform: "translate(-50%, -50%)",
         width: "75%",
         minWidth: 500,
+        maxWidth: 800,
         height: "50%",
         minHeight: 300,
         backgroundColor: "white",
