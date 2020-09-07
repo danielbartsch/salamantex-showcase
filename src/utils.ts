@@ -41,6 +41,15 @@ export const getCurrencyString = ({
   }
 }
 
+export const isValidTransaction = (
+  transaction: Transaction,
+  sourceUserBalance: number,
+  sourceUserMaxTransactionAmount: number | undefined
+): boolean =>
+  sourceUserBalance >= transaction.amount &&
+  (sourceUserMaxTransactionAmount === undefined ||
+    transaction.amount <= sourceUserMaxTransactionAmount)
+
 export const useTransactionProcessor = (
   currentDatabase: Database,
   setDatabase: (setter: (state: Database) => Database) => void
@@ -78,14 +87,13 @@ export const useTransactionProcessor = (
             [processingTransaction.id]: {
               ...prev.transactions[processingTransaction.id],
               processed: now,
-              state:
-                currentBalance <
-                  prev.transactions[processingTransaction.id].amount &&
-                currencyInfo?.maxTransactionAmount !== undefined &&
-                prev.transactions[processingTransaction.id].amount <=
-                  currencyInfo?.maxTransactionAmount
-                  ? "invalid"
-                  : "processed",
+              state: isValidTransaction(
+                prev.transactions[processingTransaction.id],
+                currentBalance,
+                currencyInfo?.maxTransactionAmount
+              )
+                ? "processed"
+                : "invalid",
             },
           },
         }))
