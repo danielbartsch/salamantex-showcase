@@ -55,7 +55,7 @@ export const User = ({ user }: { user: UserType }) => {
                   <td>
                     <CurrencyType {...currency} />
                   </td>
-                  <td>
+                  <td align="right">
                     <Balance
                       userId={user.id}
                       currencyBalance={currency.balance}
@@ -63,7 +63,7 @@ export const User = ({ user }: { user: UserType }) => {
                       now={Date.now()}
                     />
                   </td>
-                  <td>{currency.maxTransactionAmount}</td>
+                  <td align="right">{currency.maxTransactionAmount}</td>
                 </tr>
               ))}
             </tbody>
@@ -244,7 +244,7 @@ const Transaction = ({
         <Arrow color="#4a4" />
       </td>
     )}
-    <td>{transaction.amount}</td>
+    <td align="right">{transaction.amount}</td>
     <td>
       <CurrencyType type={transaction.type} />
     </td>
