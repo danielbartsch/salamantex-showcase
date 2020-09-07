@@ -8,7 +8,7 @@ export const UserRepresentation = ({ id }: { id: User["id"] }) => {
   const user = database.users[id]
 
   if (!user) {
-    return <>user not found</>
+    return <>User not found</>
   }
   return <span title={user.email}>{user.name}</span>
 }
