@@ -43,7 +43,7 @@ export const User = ({ user }: { user: UserType }) => {
           <div style={{ textDecoration: "underline", marginBottom: "0.75em" }}>
             {user.description}
           </div>
-          <table>
+          <table style={{ width: "100%" }}>
             <thead>
               <th>Currency</th>
               <th>Balance</th>
@@ -152,7 +152,7 @@ const TransactionList = ({ user }: { user: UserType }) => {
   return (
     <>
       {transactions.length > 0 ? (
-        <table>
+        <table style={{ width: "100%" }}>
           <thead>
             <th></th>
             <th></th>
