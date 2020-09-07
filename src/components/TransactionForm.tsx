@@ -29,7 +29,13 @@ const InputBox = ({
   label: React.ReactNode
   children: React.ReactNode
 }) => (
-  <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      minWidth: 0,
+    }}
+  >
     <div>{label}</div>
     {children}
   </div>
