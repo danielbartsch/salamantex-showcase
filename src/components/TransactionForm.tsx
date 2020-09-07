@@ -5,15 +5,16 @@ import { DatabaseContext } from "../globals"
 import { currencies } from "../constants"
 import { getCurrencyString } from "../utils"
 
-const Select = ({
+const Select = <T extends string>({
   options,
   onChange,
   ...props
 }: Omit<React.ComponentProps<"select">, "onChange"> & {
-  onChange: (value: string) => void
-  options: Array<{ value: string; label: string }>
+  onChange: (value: T) => void
+  options: Array<{ value: T; label: string }>
+  value: T
 }) => (
-  <select onChange={(event) => onChange(event.target.value)} {...props}>
+  <select onChange={(event) => onChange(event.target.value as T)} {...props}>
     {options.map((option) => (
       <option value={option.value} key={String(option.value)}>
         {option.label}
@@ -33,6 +34,7 @@ const InputBox = ({
     style={{
       display: "flex",
       flexDirection: "column",
+      flexGrow: 1,
       minWidth: 0,
     }}
   >
@@ -83,13 +85,11 @@ export const TransactionForm = ({
                 ? userOptions.filter(({ value }) => value !== targetUserId)
                 : userOptions
             }
-            value={sourceUserId ?? undefined}
+            value={sourceUserId ?? "undefined"}
             title={
               (users ?? []).find((user) => user.id === sourceUserId)?.email
             }
-            onChange={(newValue: any) => {
-              setSourceUserId(newValue)
-            }}
+            onChange={(newValue) => setSourceUserId(newValue)}
           />
         </InputBox>
         <InputBox label="Target">
@@ -99,13 +99,11 @@ export const TransactionForm = ({
                 ? userOptions.filter(({ value }) => value !== sourceUserId)
                 : userOptions
             }
-            value={targetUserId ?? undefined}
+            value={targetUserId ?? "undefined"}
             title={
               (users ?? []).find((user) => user.id === targetUserId)?.email
             }
-            onChange={(newValue: any) => {
-              setTargetUserId(newValue)
-            }}
+            onChange={(newValue) => setTargetUserId(newValue)}
           />
         </InputBox>
         <InputBox label="Amount">
@@ -113,9 +111,7 @@ export const TransactionForm = ({
             type="number"
             step="any"
             value={amount}
-            onChange={(event) => {
-              setAmount(event.target.valueAsNumber)
-            }}
+            onChange={(event) => setAmount(event.target.valueAsNumber)}
             min={0}
           />
         </InputBox>
@@ -123,9 +119,7 @@ export const TransactionForm = ({
           <Select
             options={currencyOptions}
             value={currency}
-            onChange={(newValue: any) => {
-              setCurrency(newValue)
-            }}
+            onChange={(newValue) => setCurrency(newValue)}
           />
         </InputBox>
       </div>
