@@ -23,7 +23,13 @@ const UserRow = ({ user }: { user: UserType }) => {
   const [showTransactions, setShowTransactions] = React.useState(false)
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <UserRepresentation id={user.id} />
         <div
           className="group"
