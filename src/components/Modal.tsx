@@ -52,7 +52,7 @@ export const Modal = ({
       >
         <div>{title}</div>
         <button onClick={onClose} style={{ border: "none" }}>
-          <CrossIcon fill="#222" />
+          <CrossIcon color="#222" />
         </button>
       </div>
       <div style={{ overflowY: "auto", flexGrow: 1 }}>{children}</div>

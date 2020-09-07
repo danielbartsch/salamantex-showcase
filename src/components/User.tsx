@@ -215,7 +215,7 @@ const TransactionState = ({ state }: { state: TransactionType["state"] }) => {
     case "invalid":
       return (
         <td title="Failed transaction">
-          <CrossIcon fill="#a44" />
+          <CrossIcon color="#a44" />
         </td>
       )
     default:
