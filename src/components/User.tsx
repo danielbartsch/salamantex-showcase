@@ -232,37 +232,30 @@ const Transaction = ({
 }: {
   transaction: TransactionType
   meId: UserType["id"]
-}) => {
-  return (
-    <>
-      <TransactionState state={transaction.state} />
-      {meId === transaction.sourceUserId ? (
-        <>
-          <td title="sent">
-            <Arrow direction="right" color="#a44" />
-          </td>
-          <td>{transaction.amount}</td>
-          <td>
-            <CurrencyType type={transaction.type} />
-          </td>
-          <td>
-            <UserRepresentation id={transaction.targetUserId} />
-          </td>
-        </>
-      ) : (
-        <>
-          <td title="received">
-            <Arrow color="#4a4" />
-          </td>
-          <td>{transaction.amount}</td>
-          <td>
-            <CurrencyType type={transaction.type} />
-          </td>
-          <td>
-            <UserRepresentation id={transaction.sourceUserId} />
-          </td>
-        </>
-      )}
-    </>
-  )
-}
+}) => (
+  <>
+    <TransactionState state={transaction.state} />
+    {meId === transaction.sourceUserId ? (
+      <td title="sent">
+        <Arrow direction="right" color="#a44" />
+      </td>
+    ) : (
+      <td title="received">
+        <Arrow color="#4a4" />
+      </td>
+    )}
+    <td>{transaction.amount}</td>
+    <td>
+      <CurrencyType type={transaction.type} />
+    </td>
+    <td>
+      <UserRepresentation
+        id={
+          meId === transaction.sourceUserId
+            ? transaction.targetUserId
+            : transaction.sourceUserId
+        }
+      />
+    </td>
+  </>
+)
