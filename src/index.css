@@ -13,6 +13,38 @@ code {
     monospace;
 }
 
+.content {
+  position: relative;
+  width: 60em;
+  margin-top: 3em;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@media only screen and (max-width: 65em) {
+  .content {
+    width: 40em;
+  }
+}
+
+@media only screen and (max-width: 45em) {
+  .content {
+    width: 29em;
+  }
+}
+
+@media only screen and (max-width: 29em) {
+  .content {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width: 22em) {
+  .content {
+    width: 17em;
+  }
+}
+
 .rotate {
   animation-name: spin;
   animation-duration: 2s;

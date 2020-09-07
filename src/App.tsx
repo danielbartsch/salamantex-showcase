@@ -23,7 +23,7 @@ export const App = () => {
 
   return (
     <DatabaseContext.Provider value={currentDatabase}>
-      <div style={{ paddingLeft: "2em", paddingRight: "2em" }}>
+      <div className="content">
         <div
           style={{
             display: "flex",
