@@ -1,7 +1,7 @@
 import * as React from "react"
 import { flatMap, map, sortBy } from "lodash"
 import { Transaction, User, CryptoCurrency } from "./types"
-import { Database } from "./globals"
+import { Database, DatabaseContext } from "./globals"
 
 export const getBalance = (
   transactions: Array<Transaction>,
@@ -26,11 +26,7 @@ export const getBalance = (
     currencyBalance ?? 0
   )
 
-export const getCurrencyString = ({
-  type,
-}: {
-  type: CryptoCurrency["type"]
-}) => {
+export const getCurrencyString = (type: CryptoCurrency["type"]) => {
   switch (type) {
     case "ethereum":
       return "Ethereum"
@@ -39,6 +35,25 @@ export const getCurrencyString = ({
     default:
       return "currency not found"
   }
+}
+
+export const useTransactionsInvolvingUser = (userId: User["id"]) => {
+  const [transactions, setTransactions] = React.useState<Array<
+    Transaction
+  > | null>(null)
+
+  const database = React.useContext(DatabaseContext)
+
+  React.useEffect(() => {
+    const transactionsInvolvingUser = map(
+      database.transactions
+    ).filter(({ sourceUserId, targetUserId }) =>
+      [sourceUserId, targetUserId].includes(userId)
+    )
+    setTransactions(transactionsInvolvingUser)
+  }, [database.transactions, userId])
+
+  return transactions
 }
 
 export const isValidTransaction = (

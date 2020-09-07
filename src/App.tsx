@@ -1,7 +1,7 @@
 import React from "react"
 import { map } from "lodash"
 import { User as UserType } from "./types"
-import { User } from "./components/User"
+import { UserList } from "./components/UserList"
 import { TransactionForm } from "./components/TransactionForm"
 import { Modal } from "./components/Modal"
 import { DatabaseContext, Database, initialDatabase } from "./globals"
@@ -36,17 +36,7 @@ export const App = () => {
             + Transaction
           </button>
         </div>
-        <div>
-          {users === null
-            ? "Loading..."
-            : users.length > 0
-            ? users.map((user) => (
-                <div className="row" key={user.id}>
-                  <User user={user} />
-                </div>
-              ))
-            : "No users saved"}
-        </div>
+        <div>{users === null ? "Loading..." : <UserList users={users} />}</div>
 
         {showTransactionForm && (
           <Modal

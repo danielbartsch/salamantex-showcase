@@ -149,5 +149,5 @@ export const TransactionForm = ({
 
 const currencyOptions = currencies.map((currency) => ({
   value: currency,
-  label: getCurrencyString({ type: currency }),
+  label: getCurrencyString(currency),
 }))
