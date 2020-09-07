@@ -45,9 +45,11 @@ export const User = ({ user }: { user: UserType }) => {
           </div>
           <table style={{ width: "100%" }}>
             <thead>
-              <th>Currency</th>
-              <th>Balance</th>
-              <th>Transaction limit</th>
+              <tr>
+                <th>Currency</th>
+                <th>Balance</th>
+                <th>Transaction limit</th>
+              </tr>
             </thead>
             <tbody>
               {user.currencies.map((currency) => (
@@ -154,11 +156,13 @@ const TransactionList = ({ user }: { user: UserType }) => {
       {transactions.length > 0 ? (
         <table style={{ width: "100%" }}>
           <thead>
-            <th></th>
-            <th></th>
-            <th>Amount</th>
-            <th>Currency</th>
-            <th>Recipient/Sender</th>
+            <tr>
+              <th></th>
+              <th></th>
+              <th>Amount</th>
+              <th>Currency</th>
+              <th>Recipient/Sender</th>
+            </tr>
           </thead>
           <tbody>
             {sortBy(transactions, ({ created }) => -created).map(
