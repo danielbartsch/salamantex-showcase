@@ -60,10 +60,13 @@ export const TransactionForm = ({
     currencies[0]
   )
 
-  const userOptions = (users ?? []).map((user) => ({
-    value: user.id,
-    label: user.name,
-  }))
+  const userOptions = [{ value: "undefined", label: "Select..." }].concat(
+    (users ?? []).map((user) => ({
+      value: user.id,
+      label: user.name,
+    }))
+  )
+
   return (
     <>
       <div style={{ display: "flex" }}>
