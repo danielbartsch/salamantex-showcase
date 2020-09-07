@@ -111,6 +111,7 @@ export const TransactionForm = ({
         <InputBox label="Amount">
           <input
             type="number"
+            step="any"
             value={amount}
             onChange={(event) => {
               setAmount(event.target.valueAsNumber)
